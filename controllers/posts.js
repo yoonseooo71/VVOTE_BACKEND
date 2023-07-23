@@ -30,8 +30,20 @@ function postWrite(req, res) {
     }
   );
 }
+function getPostsCount(request,response) {
+  const postQury = `select count(*) from posts`
+  dbClient.query(postQury,(err,result)=>{
+    if (err) {
+      response.status(500).send({ error: err });
+    } else {
+      console.log(result.rows[0]);
+      response.status(200).json(result.rows[0]);
+    }
+  })
+}
 
 module.exports = {
   getPostData,
   postWrite,
+  getPostsCount,
 };
