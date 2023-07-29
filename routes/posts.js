@@ -1,8 +1,9 @@
 const express = require("express");
-const { postWrite, getPostData, getPostsCount } = require("../controllers/posts");
+const { postWrite, getInfiniteScrollData, getPostsCount, getPostInfo } = require("../controllers/posts");
 const router = express.Router();
 
-router.get("/data/:limit&:offset",getPostData);
+router.get("/data/:limit&:offset",getInfiniteScrollData);
+router.get("/info/:postId",getPostInfo);
 router.get("/data/count",getPostsCount);
 router.post("/write", postWrite);
 
