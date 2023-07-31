@@ -1,3 +1,4 @@
+const { getUserName } = require("../lib/database");
 const dbClient = require("../postgresql");
 
 function getInfiniteScrollData(request, response) {
@@ -28,6 +29,38 @@ function getPostInfo(request, response) {
   });
 }
 
+function getComment(request, response) {
+  const postId = request.params.postId ; 
+  const postQuery = `select * from comment where post_id = $1`;
+  dbClient.query(postQuery,[postId],(err,result)=>{
+    if (err) {
+      response.status(500).send({ error: err });
+    } else {
+      const data = result.rows.map((el)=>{return {...el,reply:[]}});
+      const comments = data.filter((el)=>el.parents_id === null);
+      const replyes = data.filter((el)=>el.parents_id !== null);
+      replyes.forEach((reply)=>{
+        comments.forEach(comment=>{
+          if(reply.parents_id === comment.comment_id) {
+            comment.reply.push(reply);
+          }
+        }) 
+      })
+      response.status(200).json(comments);
+    }
+  })
+}
+
+function getPostsCount(request, response) {
+  const postQury = `select count(*) from posts`;
+  dbClient.query(postQury, (err, result) => {
+    if (err) {
+      response.status(500).send({ error: err });
+    } else {
+      response.status(200).json(result.rows[0]);
+    }
+  });
+}
 function postWrite(req, res) {
   const { title, optiona, optionb, totalvotes, avotes, bvotes, commant } =
     req.body;
@@ -45,16 +78,42 @@ function postWrite(req, res) {
     }
   );
 }
-function getPostsCount(request, response) {
-  const postQury = `select count(*) from posts`;
-  dbClient.query(postQury, (err, result) => {
-    if (err) {
-      response.status(500).send({ error: err });
-    } else {
-      console.log(result.rows[0]);
-      response.status(200).json(result.rows[0]);
+function commentWrite(request, response) {
+  const {
+    post_id,
+    comment_id,
+    writer_id,
+    writer,
+    contents,
+    likes,
+    regdate,
+    updatedate,
+    deletedate,
+    parents_id,
+  } = request.body;
+  const postQuery = `insert into comment values($1,$2,$3,$4,$5, $6,$7,$8,$9,$10)`;
+  dbClient.query(
+    postQuery,
+    [
+      post_id,
+      comment_id,
+      writer_id,
+      writer,
+      contents,
+      likes,
+      regdate,
+      updatedate,
+      deletedate,
+      parents_id,
+    ],
+    (err) => {
+      if (err) {
+        response.status(500).send({ error: err });
+      } else {
+        response.status(200).send({ message: "success" });
+      }
     }
-  });
+  );
 }
 
 module.exports = {
@@ -62,4 +121,6 @@ module.exports = {
   getPostInfo,
   postWrite,
   getPostsCount,
+  commentWrite,
+  getComment
 };
