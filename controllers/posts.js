@@ -86,12 +86,9 @@ function commentWrite(request, response) {
     writer,
     contents,
     likes,
-    regdate,
-    updatedate,
-    deletedate,
     parents_id,
   } = request.body;
-  const postQuery = `insert into comment values($1,$2,$3,$4,$5, $6,$7,$8,$9,$10)`;
+  const postQuery = `insert into comment values($1,$2,$3,$4,$5, $6,CURRENT_TIMESTAMP,null,null,$7)`;
   dbClient.query(
     postQuery,
     [
@@ -101,9 +98,6 @@ function commentWrite(request, response) {
       writer,
       contents,
       likes,
-      regdate,
-      updatedate,
-      deletedate,
       parents_id,
     ],
     (err) => {
