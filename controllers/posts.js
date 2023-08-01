@@ -62,9 +62,9 @@ function getPostsCount(request, response) {
   });
 }
 function postWrite(req, res) {
-  const { title, optiona, optionb, totalvotes, avotes, bvotes, commant } =
+  const { title, optiona, optionb, totalvotes, avotes, bvotes, commant} =
     req.body;
-  const postQuery = `insert into posts(uid,title,optiona,optionb,totalvotes,avotes,bvotes,commant,regdate,updatedate,deletedate) values ($1,$2,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,null,null)`;
+  const postQuery = `insert into posts(uid,title,likes,optiona,optionb,totalvotes,avotes,bvotes,commant,regdate,updatedate,deletedate) values ($1,$2,0,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,null,null)`;
 
   dbClient.query(
     postQuery,
