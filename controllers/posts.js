@@ -4,7 +4,7 @@ const dbClient = require("../postgresql");
 function getInfiniteScrollData(request, response) {
   const limit = request.params.limit;
   const offset = request.params.offset;
-  const postQuery = `SELECT P.*, UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id LIMIT $1 OFFSET $2;`;
+  const postQuery = `SELECT P.*, UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id order by id asc LIMIT $1 OFFSET $2;`;
   dbClient.query(postQuery, [limit, offset], (err, result) => {
     if (err) {
       response.status(500).send({ error: err });
