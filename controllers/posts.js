@@ -28,7 +28,18 @@ function getPostInfo(request, response) {
     }
   });
 }
-
+function postLikesFluctuation(request, response){
+  const postId = request.params.postId;
+  const number = request.params.number;
+  const postQuery = `update posts set likes = likes + $1 where id = $2`;
+  dbClient.query(postQuery, [number,postId], (err) => {
+    if (err) {
+      response.status(500).send({ error: err });
+    } else {
+      response.status(200).send({ message: "success" });
+    }
+  });
+}
 function getComment(request, response) {
   const postId = request.params.postId ; 
   const postQuery = `select * from comment where post_id = $1`;
@@ -116,5 +127,6 @@ module.exports = {
   postWrite,
   getPostsCount,
   commentWrite,
-  getComment
+  getComment,
+  postLikesFluctuation
 };
