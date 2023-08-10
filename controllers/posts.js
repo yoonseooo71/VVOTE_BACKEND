@@ -28,18 +28,6 @@ function getPostInfo(request, response) {
     }
   });
 }
-function postLikesFluctuation(request, response){
-  const postId = request.params.postId;
-  const number = request.params.number;
-  const postQuery = `update posts set likes = likes + $1 where id = $2`;
-  dbClient.query(postQuery, [number,postId], (err) => {
-    if (err) {
-      response.status(500).send({ error: err });
-    } else {
-      response.status(200).send({ message: "success" });
-    }
-  });
-}
 function getComment(request, response) {
   const postId = request.params.postId ; 
   const postQuery = `select * from comment where post_id = $1`;
@@ -75,7 +63,7 @@ function getPostsCount(request, response) {
 function postWrite(req, res) {
   const { title, optiona, optionb, totalvotes, avotes, bvotes, commant} =
     req.body;
-  const postQuery = `insert into posts(uid,title,likes,optiona,optionb,totalvotes,avotes,bvotes,comment_count,regdate,updatedate,deletedate) values ($1,$2,0,$3,$4,$5,$6,$7,$8,CURRENT_TIMESTAMP,null,null)`;
+  const postQuery = `insert into posts(uid,title,likes,optiona,optionb,totalvotes,avotes,bvotes,regdate,updatedate,deletedate) values ($1,$2,0,$3,$4,$5,$6,$7,,CURRENT_TIMESTAMP,null,null)`;
 
   dbClient.query(
     postQuery,
@@ -96,10 +84,9 @@ function commentWrite(request, response) {
     writer_id,
     writer,
     contents,
-    likes,
     parents_id,
   } = request.body;
-  const postQuery = `insert into comment values($1,$2,$3,$4,$5, $6,CURRENT_TIMESTAMP,null,null,$7)`;
+  const postQuery = `insert into comment (post_id,comment_id,writer_id,writer,contents, regdate,updatedate,deletedate,parents_id) values($1,$2,$3,$4,$5,CURRENT_TIMESTAMP,null,null,$6)`;
   dbClient.query(
     postQuery,
     [
@@ -108,11 +95,11 @@ function commentWrite(request, response) {
       writer_id,
       writer,
       contents,
-      likes,
       parents_id,
     ],
     (err) => {
       if (err) {
+        console.log(err);
         response.status(500).send({ error: err });
       } else {
         response.status(200).send({ message: "success" });
@@ -128,5 +115,4 @@ module.exports = {
   getPostsCount,
   commentWrite,
   getComment,
-  postLikesFluctuation
 };
