@@ -1,4 +1,3 @@
-const { getUserName } = require("../lib/database");
 const dbClient = require("../postgresql");
 
 function getInfiniteScrollData(request, response) {
@@ -107,6 +106,7 @@ function commentWrite(request, response) {
     }
   );
 }
+
 
 module.exports = {
   getInfiniteScrollData,

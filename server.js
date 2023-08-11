@@ -6,6 +6,7 @@ const cors = require("cors");
 const usersRouter = require("./routes/users");
 const postsRouter = require("./routes/posts");
 const authRouter = require("./routes/auth");
+const likeRouter = require("./routes/like");
 const dbClient = require("./postgresql");
 const passport = require("passport");
 const { selectUser, setUser } = require("./lib/database");
@@ -91,6 +92,7 @@ app.use(passport.session());
 app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/auth", authRouter);
+app.use("/like", likeRouter);
 
 
 // 에러 처리 미들웨어
