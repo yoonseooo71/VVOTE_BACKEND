@@ -19,11 +19,21 @@ function getInfiniteScrollData(request, response) {
 function getPostInfo(request, response) {
   const postId = request.params.postId;
   const postQuery = `SELECT P.*, UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id where P.id = $1`;
+  const postQuery2 = `SELECT COUNT(*) FROM posts_likes WHERE post_id =  $1`;
   dbClient.query(postQuery, [postId], (err, result) => {
     if (err) {
       response.status(500).send({ error: err });
     } else {
-      response.status(200).json(result.rows[0]);
+      const postData = result.rows[0]; 
+      dbClient.query(postQuery2,[postId],(err, result) => {
+        if (err) {
+          response.status(500).send({ error: err });
+        } else {
+          const count = parseInt(result.rows[0].count) ; 
+          const json = {...postData,likes:count};
+          response.status(200).json(json);
+        }
+      });
     }
   });
 }
