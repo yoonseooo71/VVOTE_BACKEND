@@ -1,6 +1,6 @@
 const express = require('express');
-const { postLike, isPostLike } = require('../controllers/like');
+const {checkPostLike, setPostLike } = require('../controllers/like');
 const router = express.Router();
-router.post("/posts",postLike)
-router.get("/posts/check/:postId",isPostLike);
+router.post("/posts",setPostLike)
+router.get("/posts/check/:postId",checkPostLike);
 module.exports = router;
