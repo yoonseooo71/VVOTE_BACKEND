@@ -3,9 +3,16 @@ const dbClient = require("../postgresql");
 function getInfiniteScrollData(request, response) {
   const limit = request.params.limit;
   const offset = request.params.offset;
-  const postQuery = `SELECT P.*, UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id order by regdate asc LIMIT $1 OFFSET $2;`;
+  const postQuery = `
+    SELECT P.*, UD.name as writer, (SELECT COUNT(*) FROM posts_likes WHERE post_id = P.post_id) as likes
+    FROM posts as P 
+    INNER JOIN userdata as UD on P.uid = UD.id 
+    ORDER BY regdate asc 
+    LIMIT $1 OFFSET $2;
+  `;
   dbClient.query(postQuery, [limit, offset], (err, result) => {
     if (err) {
+      console.log(err);
       response.status(500).send({ error: err });
     } else {
       response.status(200).json(result.rows);
@@ -18,15 +25,17 @@ function getInfiniteScrollData(request, response) {
 }
 function getPostInfo(request, response) {
   const postId = request.params.postId;
-  const postQuery = `SELECT P.*, UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id where P.id = $1`;
+  const postQuery = `SELECT P.*, UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id where P.post_id = $1`;
   const postQuery2 = `SELECT COUNT(*) FROM posts_likes WHERE post_id =  $1`;
   dbClient.query(postQuery, [postId], (err, result) => {
     if (err) {
+      console.log(err);
       response.status(500).send({ error: err });
     } else {
       const postData = result.rows[0]; 
       dbClient.query(postQuery2,[postId],(err, result) => {
         if (err) {
+          console.log(err);
           response.status(500).send({ error: err });
         } else {
           const count = parseInt(result.rows[0].count) ; 
@@ -70,15 +79,16 @@ function getPostsCount(request, response) {
   });
 }
 function postWrite(req, res) {
-  const { title, optiona, optionb, totalvotes, avotes, bvotes, commant} =
+  const { title, optiona, optionb, totalvotes, avotes, bvotes} =
     req.body;
-  const postQuery = `insert into posts(uid,title,likes,optiona,optionb,totalvotes,avotes,bvotes,regdate,updatedate,deletedate) values ($1,$2,0,$3,$4,$5,$6,$7,,CURRENT_TIMESTAMP,null,null)`;
+  const postQuery = `insert into posts(uid,title,optiona,optionb,totalvotes,avotes,bvotes,regdate,updatedate,deletedate) values ($1,$2,$3,$4,$5,$6,$7,CURRENT_TIMESTAMP,null,null)`;
 
   dbClient.query(
     postQuery,
-    [req.user.id, title, optiona, optionb, totalvotes, avotes, bvotes, commant],
+    [req.user.id, title, optiona, optionb, totalvotes, avotes, bvotes],
     (err) => {
       if (err) {
+        console.log(err);
         res.status(500).send({ error: err });
       } else {
         res.status(200).send({ message: "success" });

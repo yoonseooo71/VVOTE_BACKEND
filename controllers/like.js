@@ -4,9 +4,8 @@ const dbClient = require("../postgresql");
 function setPostLike(request, response) {
   const { postId } = request.body;
   const userId = request.user.id ; 
-  const likeId = uuidv4();
-  const postQuery = `insert into posts_likes (like_id, post_id, user_id, regdate, updatedate, deletedate) values ($1, $2, $3 , CURRENT_TIMESTAMP, null, null)`;
-  dbClient.query(postQuery, [likeId, postId, userId], (err) => {
+  const postQuery = `insert into posts_likes ( post_id, user_id, regdate, updatedate, deletedate) values ($1, $2, CURRENT_TIMESTAMP, null, null)`;
+  dbClient.query(postQuery, [postId, userId], (err) => {
     if (err) {
       console.log(err);
       response.status(500).send({ error: err });
