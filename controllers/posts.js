@@ -6,7 +6,9 @@ async function getInfiniteScrollData(request, response) {
     const limit = request.params.limit;
     const offset = request.params.offset;
     const postQuery = `
-      SELECT P.*, UD.name as writer, (SELECT COUNT(*) FROM posts_likes WHERE post_id = P.post_id) as likes
+      SELECT P.*, UD.name as writer, 
+      (SELECT COUNT(*) FROM posts_likes WHERE post_id = P.post_id) as likes,
+      (SELECT COUNT(*) FROM comment WHERE post_id = P.post_id) as comment_count
       FROM posts as P 
       INNER JOIN userdata as UD on P.uid = UD.id 
       ORDER BY regdate asc 
@@ -90,19 +92,22 @@ async function commentWrite(request, response) {
       contents,
       parents_id,
     } = request.body;
-    const postQuery = `insert into comment (post_id,comment_id,writer_id,writer,contents, regdate,updatedate,deletedate,parents_id) values($1,$2,$3,$4,$5,CURRENT_TIMESTAMP,null,null,$6)`;
-    await databaseQuery(postQuery,[
+    const postQuery = `insert into comment (post_id,writer_id,writer,contents,parents_id, regdate,updatedate,deletedate) values($1,$2,$3,$4,$5,CURRENT_TIMESTAMP,null,null) RETURNING *`;
+    const result = await databaseQuery(postQuery,[
       post_id,
-      comment_id,
       writer_id,
       writer,
       contents,
       parents_id,
     ])
-    response.status(200).send({ message: "success" });
+    if (parents_id === null) {
+      response.status(200).json({...result.rows[0],reply:[]});
+    } else {
+      response.status(200).json(result.rows[0]);
+    }
   } catch(err){
     console.log("commentWrite:error:",err)
-    response.status(500).send({ error:err });
+    response.status(500).send({ error:err});
   }
 }
 
