@@ -40,9 +40,9 @@ async function getPostInfo(request, response) {
 async function getComment(request, response) {
   try {
     const postId = request.params.postId ; 
-    const postQuery = `select * from comment where post_id = $1`;
+    const postQuery = `select *, (select count(*) from comment_likes where comment_id = C.comment_id) as likes from comment as C where post_id = $1`;
     const result = await databaseQuery(postQuery,[postId]); 
-    const data = result.rows.map((el)=>{return {...el,reply:[]}});
+    const data = result.rows.map((el)=>{return {...el,reply:[],likes:parseInt(el.likes)}});
     const comments = data.filter((el)=>el.parents_id === null);
     const replyes = data.filter((el)=>el.parents_id !== null);
     replyes.forEach((reply)=>{
@@ -101,7 +101,7 @@ async function commentWrite(request, response) {
       parents_id,
     ])
     if (parents_id === null) {
-      response.status(200).json({...result.rows[0],reply:[]});
+      response.status(200).json({...result.rows[0],reply:[],likes:0});
     } else {
       response.status(200).json(result.rows[0]);
     }
