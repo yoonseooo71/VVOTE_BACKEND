@@ -7,8 +7,11 @@ async function getInfiniteScrollData(request, response) {
     const offset = request.params.offset;
     const postQuery = `
       SELECT P.*, UD.name as writer, 
-      (SELECT COUNT(*) FROM posts_likes WHERE post_id = P.post_id) as likes,
-      (SELECT COUNT(*) FROM comment WHERE post_id = P.post_id) as comment_count
+      cast ((SELECT COUNT(*) FROM posts_likes WHERE post_id = P.post_id) as integer) as likes,
+      cast ((SELECT COUNT(*) FROM comment WHERE post_id = P.post_id) as integer) as comment_count,
+      cast ((select count(*) from vote where post_id = P.post_id) as integer) as totalvotes,
+      cast ((select count(*) from vote where post_id = P.post_id and vote_option = 'a') as integer) as avotes,
+      cast ((select count(*) from vote where post_id = P.post_id and vote_option = 'b') as integer) as bvotes 
       FROM posts as P 
       INNER JOIN userdata as UD on P.uid = UD.id 
       ORDER BY regdate asc 
@@ -24,13 +27,15 @@ async function getInfiniteScrollData(request, response) {
 async function getPostInfo(request, response) {
   try {
     const postId = request.params.postId;
-    const postQuery = `SELECT P.*, UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id where P.post_id = $1`;
-    const countQuery = `SELECT COUNT(*) FROM posts_likes WHERE post_id =  $1`;
+    const postQuery = `SELECT 
+      P.*, 
+      cast ((select count(*) from vote v where post_id = $1) as integer) as totalvotes,
+      cast ((select count(*) from vote v where post_id = $1 and vote_option = 'a') as integer) as avotes,
+      cast ((select count(*) from vote v where post_id = $1 and vote_option = 'b') as integer) as bvotes,
+      cast ((SELECT COUNT(*) FROM posts_likes WHERE post_id =  $1) as integer) as likes ,
+      UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id where P.post_id = $1`;
     const result = await databaseQuery(postQuery,[postId]) ; 
-    const postData = result.rows[0];
-    const countResult = await databaseQuery(countQuery,[postId]) ; 
-    const count = parseInt(countResult.rows[0].count) ; 
-    const json = {...postData,likes:count};
+    const json = result.rows[0];
     response.status(200).json(json);
   } catch (err) {
     console.log("getPostInfo:error:",err);
@@ -71,11 +76,11 @@ async function getPostsCount(request, response) {
 }
 async function postWrite(req, res) {
   try {
-    const { title, optiona, optionb, totalvotes, avotes, bvotes} =
+    const { title, optiona, optionb} =
     req.body;
-    const postQuery = `insert into posts(uid,title,optiona,optionb,totalvotes,avotes,bvotes,regdate,updatedate,deletedate) values ($1,$2,$3,$4,$5,$6,$7,CURRENT_TIMESTAMP,null,null)`;
-    await databaseQuery(postQuery,[req.user.id, title, optiona, optionb, totalvotes, avotes, bvotes])
-    res.status(200).send({ message: "success" });
+    const postQuery = `insert into posts(uid,title,optiona,optionb,regdate,updatedate,deletedate) values ($1,$2,$3,$4,CURRENT_TIMESTAMP,null,null)  RETURNING *`;
+    const result = await databaseQuery(postQuery,[req.user.id, title, optiona, optionb])
+    res.status(200).send(result.rows[0]);
   } catch(err) {
     console.log("postWrite:error:",err);
     res.status(500).send({ error: err });
