@@ -86,7 +86,6 @@ async function commentWrite(request, response) {
   try {
     const {
       post_id,
-      comment_id,
       writer_id,
       writer,
       contents,
