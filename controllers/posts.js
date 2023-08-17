@@ -1,7 +1,7 @@
 const { databaseQuery } = require("../lib/database");
 const dbClient = require("../postgresql");
 
-async function getInfiniteScrollData(request, response) {
+async function getTrendInfiniteScrollData(request, response) {
   try {
     const limit = request.params.limit;
     const offset = request.params.offset;
@@ -14,7 +14,31 @@ async function getInfiniteScrollData(request, response) {
       cast ((select count(*) from vote where post_id = P.post_id and vote_option = 'b') as integer) as bvotes 
       FROM posts as P 
       INNER JOIN userdata as UD on P.uid = UD.id 
-      ORDER BY regdate asc 
+      ORDER BY likes DESC 
+      LIMIT $1 OFFSET $2;
+    `;
+    const result = await databaseQuery(postQuery,[limit,offset]); 
+    response.status(200).json(result.rows);
+  } catch(err) {
+    console.log("getInfiniteScrollData:error:",err);
+    response.status(500).send({ error: err });
+  }
+}
+
+async function getRecentInfiniteScrollData(request, response) {
+  try {
+    const limit = request.params.limit;
+    const offset = request.params.offset;
+    const postQuery = `
+      SELECT P.*, UD.name as writer, 
+      cast ((SELECT COUNT(*) FROM posts_likes WHERE post_id = P.post_id) as integer) as likes,
+      cast ((SELECT COUNT(*) FROM comment WHERE post_id = P.post_id) as integer) as comment_count,
+      cast ((select count(*) from vote where post_id = P.post_id) as integer) as totalvotes,
+      cast ((select count(*) from vote where post_id = P.post_id and vote_option = 'a') as integer) as avotes,
+      cast ((select count(*) from vote where post_id = P.post_id and vote_option = 'b') as integer) as bvotes 
+      FROM posts as P 
+      INNER JOIN userdata as UD on P.uid = UD.id 
+      ORDER BY regdate DESC 
       LIMIT $1 OFFSET $2;
     `;
     const result = await databaseQuery(postQuery,[limit,offset]); 
@@ -117,7 +141,8 @@ async function commentWrite(request, response) {
 
 
 module.exports = {
-  getInfiniteScrollData,
+  getTrendInfiniteScrollData,
+  getRecentInfiniteScrollData,
   getPostInfo,
   postWrite,
   getPostsCount,

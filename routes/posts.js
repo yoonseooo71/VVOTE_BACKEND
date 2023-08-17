@@ -1,8 +1,9 @@
 const express = require("express");
-const { postWrite, getInfiniteScrollData, getPostsCount, getPostInfo, commentWrite, getComment} = require("../controllers/posts");
+const { postWrite, getPostsCount, getPostInfo, commentWrite, getComment, getTrendInfiniteScrollData, getRecentInfiniteScrollData} = require("../controllers/posts");
 const router = express.Router();
 
-router.get("/data/:limit&:offset",getInfiniteScrollData);
+router.get("/data/trend/:limit&:offset",getTrendInfiniteScrollData);
+router.get("/data/recent/:limit&:offset",getRecentInfiniteScrollData);
 router.get("/info/:postId",getPostInfo);
 router.get("/data/count",getPostsCount);
 router.get("/comment/:postId",getComment);
