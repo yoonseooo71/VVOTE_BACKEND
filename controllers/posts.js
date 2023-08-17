@@ -56,6 +56,7 @@ async function getPostInfo(request, response) {
       cast ((select count(*) from vote v where post_id = $1) as integer) as totalvotes,
       cast ((select count(*) from vote v where post_id = $1 and vote_option = 'a') as integer) as avotes,
       cast ((select count(*) from vote v where post_id = $1 and vote_option = 'b') as integer) as bvotes,
+      cast ((SELECT COUNT(*) FROM comment WHERE post_id = $1) as integer) as comment_count,
       cast ((SELECT COUNT(*) FROM posts_likes WHERE post_id =  $1) as integer) as likes ,
       UD.name as writer FROM posts as P INNER JOIN userdata as UD on P.uid = UD.id where P.post_id = $1`;
     const result = await databaseQuery(postQuery,[postId]) ; 
