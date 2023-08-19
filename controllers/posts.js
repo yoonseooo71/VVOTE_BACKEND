@@ -14,6 +14,7 @@ async function getTrendInfiniteScrollData(request, response) {
       cast ((select count(*) from vote where post_id = P.post_id and vote_option = 'b') as integer) as bvotes 
       FROM posts as P 
       INNER JOIN userdata as UD on P.uid = UD.id 
+      WHERE P.deletedate is null
       ORDER BY likes DESC 
       LIMIT $1 OFFSET $2;
     `;
@@ -38,6 +39,7 @@ async function getRecentInfiniteScrollData(request, response) {
       cast ((select count(*) from vote where post_id = P.post_id and vote_option = 'b') as integer) as bvotes 
       FROM posts as P 
       INNER JOIN userdata as UD on P.uid = UD.id 
+      WHERE P.deletedate is null
       ORDER BY regdate DESC 
       LIMIT $1 OFFSET $2;
     `;
