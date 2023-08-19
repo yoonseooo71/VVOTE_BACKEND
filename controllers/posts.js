@@ -114,6 +114,17 @@ async function postWrite(req, res) {
 
   }
 }
+async function deletePost(request,response) {
+  try {
+    const {postId} = request.body ; 
+    const postQuery = `update posts set deletedate = current_timestamp where post_id = $1` ; 
+    await databaseQuery(postQuery,[postId]);
+    response.status(200).send({message:"success"});
+  } catch(err){
+    console.error("deletePost:error:",err);
+    res.status(500).send({ error: err });
+  }
+}
 async function commentWrite(request, response) {
   try {
     const {
@@ -151,4 +162,5 @@ module.exports = {
   getPostsCount,
   commentWrite,
   getComment,
+  deletePost
 };
