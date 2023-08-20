@@ -8,6 +8,7 @@ const postsRouter = require("./routes/posts");
 const authRouter = require("./routes/auth");
 const likeRouter = require("./routes/like");
 const voteRouter = require("./routes/vote");
+const searchRouter = require('./routes/search');
 const dbClient = require("./postgresql");
 const passport = require("passport");
 const { selectUser, setUser } = require("./lib/database");
@@ -95,6 +96,7 @@ app.use("/posts", postsRouter);
 app.use("/auth", authRouter);
 app.use("/like", likeRouter);
 app.use('/vote', voteRouter);
+app.use('/search',searchRouter);
 
 
 // 에러 처리 미들웨어
