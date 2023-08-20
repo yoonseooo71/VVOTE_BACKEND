@@ -1,14 +1,23 @@
 const express = require("express");
-const { postWrite, getPostsCount, getPostInfo, commentWrite, getComment, getTrendInfiniteScrollData, getRecentInfiniteScrollData, deletePost} = require("../controllers/posts");
+const {
+  postWrite,
+  getPostsCount,
+  getPostInfo,
+  commentWrite,
+  getComment,
+  getTrendInfiniteScrollData,
+  getRecentInfiniteScrollData,
+  deletePost,
+} = require("../controllers/posts");
 const router = express.Router();
 
-router.get("/data/trend/:limit&:offset",getTrendInfiniteScrollData);
-router.get("/data/recent/:limit&:offset",getRecentInfiniteScrollData);
-router.get("/info/:postId",getPostInfo);
-router.get("/data/count",getPostsCount);
-router.get("/comment/:postId",getComment);
+router.get("/data/trend/:limit&:offset", getTrendInfiniteScrollData);
+router.get("/data/recent/:limit&:offset", getRecentInfiniteScrollData);
+router.get("/info/:postId", getPostInfo);
+router.get("/data/count", getPostsCount);
+router.get("/comment/:postId", getComment);
 router.post("/write", postWrite);
-router.delete("/delete", deletePost) ;
-router.post("/write/comment",commentWrite)
+router.delete("/delete", deletePost);
+router.post("/write/comment", commentWrite);
 
 module.exports = router;

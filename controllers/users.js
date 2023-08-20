@@ -7,10 +7,10 @@ function logout(req, res) {
   req.logout((err) => {
     req.session.destroy();
     if (err) {
-			console.log('logout:error:',err);
-      res.status(500).send({error:err});
+      console.log("logout:error:", err);
+      res.status(500).send({ error: err });
     } else {
-      res.status(200).send({massege:"server ok: 로그아웃 완료"});
+      res.status(200).send({ massege: "server ok: 로그아웃 완료" });
     }
   });
 }

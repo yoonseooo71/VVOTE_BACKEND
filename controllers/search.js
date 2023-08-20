@@ -1,6 +1,5 @@
 const { databaseQuery } = require("../lib/database");
 
-
 async function getSearchInfiniteScrollData(request, response) {
   try {
     const limit = request.params.limit;
@@ -20,7 +19,7 @@ async function getSearchInfiniteScrollData(request, response) {
       ORDER BY likes DESC 
       LIMIT $2 OFFSET $3;
     `;
-    const result = await databaseQuery(postQuery, [searchQuery,limit, offset]);
+    const result = await databaseQuery(postQuery, [searchQuery, limit, offset]);
     response.status(200).json(result.rows);
   } catch (err) {
     console.log("getInfiniteScrollData:error:", err);
@@ -29,4 +28,4 @@ async function getSearchInfiniteScrollData(request, response) {
 }
 module.exports = {
   getSearchInfiniteScrollData,
-}
+};

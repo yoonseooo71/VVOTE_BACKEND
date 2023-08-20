@@ -8,7 +8,7 @@ const postsRouter = require("./routes/posts");
 const authRouter = require("./routes/auth");
 const likeRouter = require("./routes/like");
 const voteRouter = require("./routes/vote");
-const searchRouter = require('./routes/search');
+const searchRouter = require("./routes/search");
 const dbClient = require("./postgresql");
 const passport = require("passport");
 const { selectUser, setUser } = require("./lib/database");
@@ -71,10 +71,12 @@ passport.use(
 // 미들웨어 설정
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors({
-  origin: process.env.CLIENT_URL, // 접근 권한을 부여하는 도메인
-  credentials: true, // 응답 헤더에 Access-Control-Allow-Credentials 추가
-}));
+app.use(
+  cors({
+    origin: process.env.CLIENT_URL, // 접근 권한을 부여하는 도메인
+    credentials: true, // 응답 헤더에 Access-Control-Allow-Credentials 추가
+  })
+);
 app.use(
   session({
     store: new pgSession({
@@ -95,9 +97,8 @@ app.use("/users", usersRouter);
 app.use("/posts", postsRouter);
 app.use("/auth", authRouter);
 app.use("/like", likeRouter);
-app.use('/vote', voteRouter);
-app.use('/search',searchRouter);
-
+app.use("/vote", voteRouter);
+app.use("/search", searchRouter);
 
 // 에러 처리 미들웨어
 app.use((err, req, res, next) => {
